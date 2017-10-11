@@ -70,7 +70,8 @@ end
 
 config = load_config('config.json')
 
-logger = Logger.new(STDOUT, level: Logger::WARN)
+logger = Logger.new(STDOUT)
+logger.level = Logger::WARN
 
 client = Smartsheet::Client.new(token: config['token'], logger: logger)
 
