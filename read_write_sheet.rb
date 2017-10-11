@@ -1,4 +1,5 @@
 require 'smartsheet'
+require 'logger'
 
 def row_update(row_id, column_id, value)
   {
@@ -69,7 +70,9 @@ end
 
 config = load_config('config.json')
 
-client = Smartsheet::Client.new(token: config['token'])
+logger = Logger.new(STDOUT, level: Logger::WARN)
+
+client = Smartsheet::Client.new(token: config['token'], logger: logger)
 
 begin
   update_complete_rows(config['sheet_id'], client)
