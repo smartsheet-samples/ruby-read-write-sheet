@@ -6,16 +6,17 @@ GEM
       multipart-post (>= 1.2, < 3)
     multipart-post (2.0.0)
     plissken (1.2.0)
-    smartsheet (1.0.0.beta.0)
+    smartsheet (1.0.0.beta.1)
       awrence (~> 1.0)
       faraday (~> 0.13.1)
       plissken (~> 1.2)
 
 PLATFORMS
+  ruby
   x64-mingw32
 
 DEPENDENCIES
-  smartsheet (>= 1.0.0.beta)
+  smartsheet (>= 1.0.0.beta.1)
 
 BUNDLED WITH
    1.15.4
