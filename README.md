@@ -14,7 +14,7 @@ This is implemented in the `build_update_complete_row` method which you should m
 
 
 ## Setup
-* Install the smartsheet library with `gem install smartsheet --pre` or `bundle` at the command line
+* Install the smartsheet library with `gem install smartsheet` or `bundle` at the command line
 * Import the sample data from "Sample Sheet.xlsx" into a new sheet
 
 * Update the `config.json` file with these two settings:

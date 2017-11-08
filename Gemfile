@@ -1,2 +1,2 @@
 source 'https://rubygems.org'
-gem 'smartsheet', '>= 1.0.0.beta.1'
+gem 'smartsheet', '>= 1.0.0'
