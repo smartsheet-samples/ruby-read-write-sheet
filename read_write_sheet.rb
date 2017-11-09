@@ -1,85 +1,80 @@
 require 'smartsheet'
 require 'logger'
 
-def row_update(row_id, column_id, value)
-  {
-    id: row_id,
-    cells: [{
-      columnId: column_id,
-      value: value
-    }]
-  }
+# Find cell in a row, based on column name
+def get_cell_by_column_name(row, column_name, column_map)
+  column_id = column_map[column_name]
+  row[:cells].find {|cell| cell[:column_id] == column_id}
 end
 
-def column_map(sheet)
+# Evaluate row contents, and build update info if needed
+def evaluate_row_and_build_update(row, column_map)
+  status_cell = get_cell_by_column_name(row, 'Status', column_map)
+  remaining_cell = get_cell_by_column_name(row, 'Remaining', column_map)
+
+  row_to_update = nil
+
+  # Check if status is complete but remaining is not 0
+  if status_cell[:display_value] == 'Complete' && remaining_cell[:display_value] != '0'
+    puts "Updating row #{row[:row_number]}"
+    row_to_update = {
+      id: row[:id],
+      cells: [{
+        columnId: remaining_cell[:column_id],
+        value: 0
+      }]
+    }
+  end
+  return row_to_update
+end
+
+
+# TODO: Edit config.json to set desired sheet id and API token
+config = JSON.load(File.open('config.json'))
+
+# If empty, defaults to environment variable SMARTSHEET_ACCESS_TOKEN
+access_token = config['token']
+
+# Id of sheet to load and update
+sheet_id = config['sheet_id']
+
+# Configure logging
+logger = Logger.new(STDOUT)
+logger.level = Logger::INFO
+
+# Initialize client SDK
+client = Smartsheet::Client.new(token: access_token, logger: logger)
+
+begin
+  # Load entire sheet
+  sheet = client.sheets.get(sheet_id: sheet_id)
+  puts "Loaded #{sheet[:total_row_count]} rows from sheet '#{sheet[:name]}'"
+
+  # Build column map for later reference - converts column name to column id
   column_map = {}
   sheet[:columns].each do |column|
     column_map[column[:title]] = column[:id]
   end
 
-  column_map
-end
+  # Accumulate rows needing update here
+  rows_to_update = []
 
-def get_cell_by_column(row, column_id)
-  row[:cells].find { |cell| cell[:column_id] == column_id }
-end
-
-def get_cell_by_column_name(row, column_name, column_map)
-  get_cell_by_column(row, column_map[column_name])
-end
-
-def build_update_complete_row(row, column_map)
-  status_cell = get_cell_by_column_name(row, 'Status', column_map)
-  remaining_cell = get_cell_by_column_name(row, 'Remaining', column_map)
-
-  return unless status_cell[:display_value] == 'Complete'
-  return if remaining_cell[:display_value] == '0'
-
-  puts "Updating row #{row[:row_number]}"
-  row_update(row[:id], remaining_cell[:column_id], 0)
-end
-
-def build_update_complete_rows_body(sheet)
-  column_map = column_map(sheet)
-  update_rows = []
+  # Evaluate each row
   sheet[:rows].each do |row|
-    update_row = build_update_complete_row(row, column_map)
-    update_rows.push(update_row) unless update_row.nil?
+    update_row = evaluate_row_and_build_update(row, column_map)
+    rows_to_update.push(update_row) unless update_row.nil?
   end
 
-  update_rows
-end
-
-def update_complete_rows(sheet_id, client)
-  sheet = client.sheets.get(sheet_id: sheet_id)
-
-  update_rows_body = build_update_complete_rows_body(sheet)
-  if update_rows_body.empty?
+  if rows_to_update.empty?
     puts 'No Update Required'
-    return
+  else
+    # Save changes to sheet
+    client.sheets.rows.update(sheet_id: sheet[:id], body: rows_to_update)
   end
 
-  client.sheets.rows.update(sheet_id: sheet[:id], body: update_rows_body)
-end
-
-def load_config(config_name)
-  file = File.open(config_name)
-
-  JSON.load(file)
-end
-
-config = load_config('config.json')
-
-logger = Logger.new(STDOUT)
-logger.level = Logger::INFO
-
-client = Smartsheet::Client.new(token: config['token'], logger: logger)
-
-begin
-  update_complete_rows(config['sheet_id'], client)
 rescue Smartsheet::ApiError => e
   puts 'API returned error:'
-  puts "\terror code: #{e.error_code}"
-  puts "\tref id: #{e.ref_id}"
-  puts "\tmessage: #{e.message}"
+  puts "\t error code: #{e.error_code}"
+  puts "\t message: #{e.message}"
+  puts "\t ref id: #{e.ref_id}"
 end
