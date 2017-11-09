@@ -10,7 +10,7 @@ This is a minimal Smartsheet sample that demonstrates how to
 
 
 This sample scans a sheet for rows where the value of the "Status" column is "Complete" and sets the "Remaining" column to zero.
-This is implemented in the `build_update_complete_row` method which you should modify to meet your needs.
+This is implemented in the `evaluate_row_and_build_update` method which you could modify to meet your needs.
 
 
 ## Setup
