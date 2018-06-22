@@ -28,6 +28,22 @@ def evaluate_row_and_build_update(row, column_map)
   return row_to_update
 end
 
+# Import an Excel sheet to operate on; see the bundled 'Sample Sheet.xlsx'
+def import_excel_sheet(client, file_path, sheet_name)
+  result = client.sheets.import_from_file_path(
+    path: file_path,
+    file_type: :xlsx,
+    params: {
+      sheetName: sheet_name,
+      headerRowIndex: 0,
+      primaryColumnIndex: 0
+    }
+  )[:result]
+
+  puts "Imported Excel doc to sheet named '#{result[:name]}'"
+
+  result[:id]
+end
 
 # TODO: Edit config.json to set desired sheet id and API token
 config = JSON.load(File.open('config.json'))
@@ -35,8 +51,11 @@ config = JSON.load(File.open('config.json'))
 # If empty, defaults to environment variable SMARTSHEET_ACCESS_TOKEN
 access_token = config['token']
 
-# Id of sheet to load and update
-sheet_id = config['sheet_id']
+# Sample sheet file to import to Smartsheet
+excel_file_path = config['source_excel_path']
+
+# Name to assign to the imported sheet
+sheet_name = config['sheet_name']
 
 # Configure logging
 logger = Logger.new(STDOUT)
@@ -46,6 +65,9 @@ logger.level = Logger::INFO
 client = Smartsheet::Client.new(token: access_token, logger: logger)
 
 begin
+  # Import sample sheet
+  sheet_id = import_excel_sheet(client, excel_file_path, sheet_name)
+
   # Load entire sheet
   sheet = client.sheets.get(sheet_id: sheet_id)
   puts "Loaded #{sheet[:total_row_count]} rows from sheet '#{sheet[:name]}'"
