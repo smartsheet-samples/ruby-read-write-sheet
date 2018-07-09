@@ -1,4 +1,5 @@
 {
-  "token": "",
-  "sheet_id": "3948180799809412"
+  "token": "", 
+  "source_excel_path": "./Sample Sheet.xlsx",
+  "sheet_name": "Read-Write Sample Sheet"
 }
