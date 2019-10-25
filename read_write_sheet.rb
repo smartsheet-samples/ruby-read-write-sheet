@@ -48,8 +48,8 @@ end
 # TODO: Edit config.json to set desired sheet id and API token
 config = JSON.load(File.open('config.json'))
 
-# If empty, defaults to environment variable SMARTSHEET_ACCESS_TOKEN
-access_token = config['token']
+# Uses the access token stored in environment variable "SMARTSHEET_ACCESS_TOKEN"
+access_token = ENV['SMARTSHEET_ACCESS_TOKEN']
 
 # Sample sheet file to import to Smartsheet
 excel_file_path = config['source_excel_path']

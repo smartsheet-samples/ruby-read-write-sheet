@@ -1,5 +1,4 @@
 {
-  "token": "", 
   "source_excel_path": "./Sample Sheet.xlsx",
   "sheet_name": "Read-Write Sample Sheet"
 }
