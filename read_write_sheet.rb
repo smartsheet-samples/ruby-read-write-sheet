@@ -50,6 +50,10 @@ config = JSON.load(File.open('config.json'))
 
 # Uses the access token stored in environment variable "SMARTSHEET_ACCESS_TOKEN"
 access_token = ENV['SMARTSHEET_ACCESS_TOKEN']
+if access_token.nil? 
+  puts 'The environment variable SMARTSHEET_ACCESS_TOKEN is not set. Please set then rerun the program.'
+  return
+end
 
 # Sample sheet file to import to Smartsheet
 excel_file_path = config['source_excel_path']
