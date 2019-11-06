@@ -48,13 +48,6 @@ end
 # TODO: Edit config.json to set desired sheet id and API token
 config = JSON.load(File.open('config.json'))
 
-# Uses the access token stored in environment variable "SMARTSHEET_ACCESS_TOKEN"
-access_token = ENV['SMARTSHEET_ACCESS_TOKEN']
-if access_token.nil? 
-  puts 'The environment variable SMARTSHEET_ACCESS_TOKEN is not set. Please set then rerun the program.'
-  return
-end
-
 # Sample sheet file to import to Smartsheet
 excel_file_path = config['source_excel_path']
 
@@ -65,8 +58,8 @@ sheet_name = config['sheet_name']
 logger = Logger.new(STDOUT)
 logger.level = Logger::INFO
 
-# Initialize client SDK
-client = Smartsheet::Client.new(token: access_token, logger: logger)
+# Initialize client SDK. Uses the access token stored in environment variable "SMARTSHEET_ACCESS_TOKEN"
+client = Smartsheet::Client.new(logger: logger)
 
 begin
   # Import sample sheet
